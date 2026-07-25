@@ -1,26 +1,15 @@
 # FCDex Website
 
-React SPA built with [Vite](https://vite.dev), [React Router](https://reactrouter.com), and [Tailwind CSS](https://tailwindcss.com).
+Made with pure HTML and CSS 😏☕
 
-## Getting Started
+## Getting Started for External Viewers
 
 ```bash
-bun install
-bun dev
+npx serve -p 8080
 ```
 
-Open [http://localhost:5173](http://localhost:5173) in your browser.
+Open [http://localhost:8080](http://localhost:8080) in your browser.
 
-## Scripts
+## Deployment Solution
 
-| Command | Description |
-| --- | --- |
-| `bun dev` | Start the Vite dev server |
-| `bun run build` | Type-check and build for production |
-| `bun run preview` | Preview the production build locally |
-| `bun run lint` | Run Biome checks |
-| `bun run check` | Auto-fix with Biome |
-
-## Deploy
-
-Build static assets with `bun run build` and serve the `dist/` folder from any static host (Netlify, Cloudflare Pages, nginx, etc.). Configure the host for SPA fallback to `index.html` so client-side routes work.
+We mainly use GitHub Pages, principally for custom domain hosting, but you can always take a handful of solutions from Vercel and such. The choice is yours!
