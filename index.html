@@ -2,16 +2,1154 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/logo.webp" />
+    <link rel="icon" type="image/webp" href="public/logo.webp" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta
       name="description"
       content="The Ultimate Football Collection Platform"
     />
     <title>FCDex</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap"
+      rel="stylesheet"
+    />
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              bebas: ['"Bebas Neue"', "sans-serif"],
+            },
+            keyframes: {
+              shine: {
+                to: { "background-position": "-200% center" },
+              },
+              float: {
+                "0%,100%": { transform: "translateY(0)" },
+                "50%": { transform: "translateY(-4px)" },
+              },
+              "page-enter": {
+                from: {
+                  opacity: "0",
+                  transform: "translateY(20px)",
+                  filter: "blur(12px)",
+                },
+                to: {
+                  opacity: "1",
+                  transform: "translateY(0)",
+                  filter: "blur(0)",
+                },
+              },
+              "dropdown-in": {
+                from: {
+                  opacity: "0",
+                  transform: "translateY(-10px) scale(0.97)",
+                },
+                to: {
+                  opacity: "1",
+                  transform: "translateY(0) scale(1)",
+                },
+              },
+              "dropdown-item": {
+                from: {
+                  opacity: "0",
+                  transform: "translateX(-8px)",
+                },
+                to: {
+                  opacity: "1",
+                  transform: "translateX(0)",
+                },
+              },
+            },
+            animation: {
+              shine: "shine 5s linear infinite",
+              "shine-fast": "shine 4s linear infinite",
+              float: "float 3s ease-in-out infinite",
+              "page-enter":
+                "page-enter 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards",
+              "dropdown-in":
+                "dropdown-in 0.22s cubic-bezier(0.22, 1, 0.36, 1) forwards",
+              "dropdown-item":
+                "dropdown-item 0.28s cubic-bezier(0.22, 1, 0.36, 1) forwards",
+            },
+          },
+        },
+      };
+    </script>
+
+    <style>
+      html,
+      body,
+      #app {
+        min-height: 100%;
+      }
+      html {
+        scroll-behavior: smooth;
+      }
+      body {
+        margin: 0;
+        background-color: #000;
+        color: #fff;
+      }
+      .font-bebas {
+        font-family: "Bebas Neue", sans-serif;
+      }
+    </style>
   </head>
   <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
+    <div id="app"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@tsparticles/slim@4.1.3/tsparticles.slim.bundle.min.js"></script>
+    <script>
+      "use strict";
+
+      const DISCORD_URL = "https://discord.gg/fcdex";
+
+      const collections = [
+        {
+          slug: "los-galacticos",
+          title: "Los Galácticos",
+          club: "Real Madrid",
+          founded: "1902",
+          trophies: "97",
+          league: "La Liga",
+          era: "2000–2006",
+          image: "public/galacticos.webp",
+          description:
+            "The legendary Galácticos era featured icons like Zidane, Ronaldo, Beckham, and Figo.",
+          players: [
+            "Zinedine Zidane",
+            "Ronaldo Nazário",
+            "David Beckham",
+            "Luís Figo",
+            "Roberto Carlos",
+          ],
+          tier: 15,
+          obtainable: true,
+        },
+        {
+          slug: "invincibles",
+          title: "Invincibles",
+          club: "Arsenal",
+          founded: "1886",
+          trophies: "48",
+          league: "Premier League",
+          era: "2003–2004",
+          image: "public/invincibles.webp",
+          description:
+            "Arsenal completed an unbeaten Premier League season under Arsène Wenger.",
+          players: [
+            "Thierry Henry",
+            "Patrick Vieira",
+            "Dennis Bergkamp",
+            "Robert Pirès",
+            "Sol Campbell",
+          ],
+          tier: 20,
+          obtainable: true,
+        },
+        {
+          slug: "klopp-era",
+          title: "Klopp Era",
+          club: "Liverpool",
+          founded: "1892",
+          trophies: "69",
+          league: "Premier League",
+          era: "2015–2024",
+          image: "public/liverpool.webp",
+          description:
+            "Klopp transformed Liverpool into European and Premier League champions.",
+          players: [
+            "Mohamed Salah",
+            "Virgil van Dijk",
+            "Sadio Mané",
+            "Alisson",
+            "Trent Alexander-Arnold",
+          ],
+          tier: 25,
+          obtainable: true,
+        },
+        {
+          slug: "manchester-united",
+          title: "Manchester United (2008)",
+          club: "Manchester United",
+          founded: "1878",
+          trophies: "68",
+          league: "Premier League",
+          era: "1990–2013",
+          image: "public/united.webp",
+          description:
+            "Sir Alex Ferguson built one of football’s greatest dynasties.",
+          players: [
+            "Cristiano Ronaldo",
+            "Wayne Rooney",
+            "Ryan Giggs",
+            "Paul Scholes",
+            "Rio Ferdinand",
+          ],
+          tier: 2,
+          obtainable: true,
+        },
+      ];
+
+      function getRarityStyles(tier, obtainable) {
+        if (!obtainable) {
+          if (tier <= 2) {
+            return {
+              border: "border-orange-400/50",
+              glow: "shadow-[0_0_60px_rgba(249,115,22,0.45)]",
+              badge: "bg-orange-500 text-black",
+              gradient: "from-orange-500/30 via-yellow-500/20 to-red-500/20",
+            };
+          }
+          if (tier <= 8) {
+            return {
+              border: "border-purple-400/40",
+              glow: "shadow-[0_0_50px_rgba(168,85,247,0.45)]",
+              badge: "bg-purple-500 text-white",
+              gradient: "from-purple-500/30 to-orange-500/10",
+            };
+          }
+        }
+        if (tier <= 5) {
+          return {
+            border: "border-orange-500/40",
+            glow: "shadow-[0_0_45px_rgba(249,115,22,0.35)]",
+            badge: "bg-orange-500 text-black",
+            gradient: "from-orange-500/20 to-red-500/10",
+          };
+        }
+        if (tier <= 15) {
+          return {
+            border: "border-red-500/40",
+            glow: "shadow-[0_0_40px_rgba(239,68,68,0.35)]",
+            badge: "bg-red-500 text-white",
+            gradient: "from-red-500/20 to-orange-500/10",
+          };
+        }
+        if (tier <= 35) {
+          return {
+            border: "border-purple-500/40",
+            glow: "shadow-[0_0_40px_rgba(168,85,247,0.35)]",
+            badge: "bg-purple-500 text-white",
+            gradient: "from-purple-500/20 to-pink-500/10",
+          };
+        }
+        if (tier <= 60) {
+          return {
+            border: "border-blue-500/40",
+            glow: "shadow-[0_0_40px_rgba(59,130,246,0.35)]",
+            badge: "bg-blue-500 text-white",
+            gradient: "from-blue-500/20 to-cyan-500/10",
+          };
+        }
+        return {
+          border: "border-zinc-500/40",
+          glow: "shadow-[0_0_35px_rgba(161,161,170,0.25)]",
+          badge: "bg-zinc-700 text-white",
+          gradient: "from-zinc-700/20 to-zinc-500/10",
+        };
+      }
+
+      const particleOptions = {
+        background: { color: { value: "transparent" } },
+        fpsLimit: 120,
+        particles: {
+          color: { value: "#f97316" },
+          links: {
+            color: "#f97316",
+            distance: 150,
+            enable: true,
+            opacity: 0.15,
+            width: 1,
+          },
+          move: {
+            direction: "none",
+            enable: true,
+            outModes: { default: "bounce" },
+            random: false,
+            speed: 1,
+            straight: false,
+          },
+          number: { density: { enable: true }, value: 45 },
+          opacity: { value: 0.2 },
+          shape: { type: "circle" },
+          size: { value: { min: 1, max: 4 } },
+        },
+        detectRetina: true,
+      };
+
+      const filterOptions = [
+        { value: "all", label: "All Collections" },
+        { value: "obtainable", label: "Obtainable" },
+        { value: "exclusive", label: "Exclusive" },
+      ];
+      const sortOptions = [
+        { value: "rarity", label: "Highest Rarity" },
+        { value: "alphabetical", label: "Alphabetical" },
+      ];
+
+      function brandLockup(size, heading) {
+        return (
+          '<a href="#/" class="group flex items-center gap-4">' +
+          '<div class="relative animate-float transition-transform duration-300 group-hover:scale-110">' +
+          '<div class="absolute inset-0 rounded-full bg-orange-500/30 blur-2xl transition-all duration-500 group-hover:bg-orange-500/60"></div>' +
+          '<div class="absolute inset-[-6px] animate-spin rounded-full border border-orange-500/30"></div>' +
+          '<div class="relative transition-transform duration-700 group-hover:rotate-[360deg]">' +
+          '<div class="absolute inset-0 rounded-full bg-[linear-gradient(120deg,transparent_20%,rgba(255,255,255,0.45)_50%,transparent_80%)] bg-[length:250%_250%] animate-shine-fast"></div>' +
+          '<img src="public/logo.webp" alt="FCDex" width="' +
+          size +
+          '" height="' +
+          size +
+          '" class="relative z-10 drop-shadow-[0_0_25px_rgba(249,115,22,0.55)]" />' +
+          "</div>" +
+          "</div>" +
+          "<" +
+          heading +
+          ' class="font-bebas text-4xl uppercase tracking-wide"><span class="text-white">FC</span><span class="text-orange-500">Dex</span></' +
+          heading +
+          ">" +
+          "</a>"
+        );
+      }
+
+      function navbar() {
+        const link =
+          "text-sm font-medium text-zinc-300 transition hover:text-orange-400";
+        return (
+          '<header class="fixed top-0 z-50 w-full border-b border-white/5 bg-black/40 backdrop-blur-xl">' +
+          '<div class="mx-auto flex h-20 max-w-7xl items-center justify-between px-6">' +
+          brandLockup(58, "h1") +
+          '<nav class="hidden items-center gap-10 md:flex">' +
+          '<a href="#/" class="' +
+          link +
+          '">Home</a>' +
+          '<a href="#/" onclick="scrollToCollections(event)" class="' +
+          link +
+          '">Collections</a>' +
+          '<a href="#/tos" class="' +
+          link +
+          '">ToS</a>' +
+          '<a href="#/privacy" class="' +
+          link +
+          '">Privacy</a>' +
+          "</nav>" +
+          '<a href="' +
+          DISCORD_URL +
+          '" target="_blank" rel="noopener noreferrer" class="rounded-xl bg-orange-500 px-5 py-2.5 text-sm font-semibold text-black shadow-[0_0_30px_rgba(249,115,22,0.3)] transition-all duration-300 hover:scale-105 hover:bg-orange-400">Join Discord</a>' +
+          "</div>" +
+          "</header>"
+        );
+      }
+
+      function footer() {
+        const fl = "transition hover:text-orange-400";
+        return (
+          '<footer class="relative overflow-hidden border-t border-white/5 px-6 py-14">' +
+          '<div class="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(249,115,22,0.08),transparent_65%)]"></div>' +
+          '<div class="relative z-10 mx-auto flex max-w-7xl flex-col items-center justify-between gap-10 md:flex-row">' +
+          '<div class="flex flex-col items-center gap-4 md:items-start">' +
+          brandLockup(54, "h2") +
+          '<p class="max-w-md text-center text-sm leading-relaxed text-zinc-500 md:text-left">The ultimate football collection platform featuring legendary eras, iconic clubs, rare collectibles, and football history.</p>' +
+          "</div>" +
+          '<div class="flex flex-col items-center gap-6 md:items-end">' +
+          '<div class="flex flex-wrap items-center justify-center gap-6 text-sm font-medium text-zinc-400">' +
+          '<a href="#/" class="' +
+          fl +
+          '">Home</a>' +
+          '<a href="#/tos" class="' +
+          fl +
+          '">ToS</a>' +
+          '<a href="#/privacy" class="' +
+          fl +
+          '">Privacy</a>' +
+          '<a href="' +
+          DISCORD_URL +
+          '" target="_blank" rel="noopener noreferrer" class="' +
+          fl +
+          '">Discord</a>' +
+          "</div>" +
+          '<p class="text-xs uppercase tracking-[0.3em] text-zinc-600">© 2026 FCDex — All Rights Reserved</p>' +
+          "</div>" +
+          "</div>" +
+          "</footer>"
+        );
+      }
+
+      function statusClasses(obtainable) {
+        return obtainable
+          ? "border-white/10 bg-white/5 text-zinc-300"
+          : "border-orange-400/30 bg-orange-500/10 text-orange-300";
+      }
+
+      function shineOverlay() {
+        return '<div class="absolute inset-0 bg-[linear-gradient(120deg,transparent_20%,rgba(255,255,255,0.12)_50%,transparent_80%)] bg-[length:250%_250%] animate-shine"></div>';
+      }
+
+      function dbCard(c) {
+        const r = getRarityStyles(c.tier, c.obtainable);
+        return (
+          '<div class="group relative overflow-hidden rounded-3xl border bg-gradient-to-br p-6 backdrop-blur-xl transition-all duration-500 hover:-translate-y-2 hover:scale-[1.02] ' +
+          r.border +
+          " " +
+          r.glow +
+          " " +
+          r.gradient +
+          '">' +
+          (c.obtainable ? "" : shineOverlay()) +
+          '<div class="relative mb-6 flex h-56 items-center justify-center overflow-hidden rounded-2xl">' +
+          '<img src="' +
+          c.image +
+          '" alt="' +
+          c.title +
+          '" width="220" height="220" class="object-contain transition-all duration-500 group-hover:scale-110" />' +
+          "</div>" +
+          '<div class="mb-5 flex gap-2">' +
+          '<div class="rounded-full px-3 py-1 text-xs font-bold uppercase tracking-widest ' +
+          r.badge +
+          '">T' +
+          c.tier +
+          "</div>" +
+          '<div class="rounded-full border px-3 py-1 text-xs font-bold uppercase tracking-widest ' +
+          statusClasses(c.obtainable) +
+          '">' +
+          (c.obtainable ? "Obtainable" : "Exclusive") +
+          "</div>" +
+          "</div>" +
+          '<h3 class="font-bebas text-4xl uppercase tracking-wide">' +
+          c.title +
+          "</h3>" +
+          '<p class="mt-2 text-zinc-300">' +
+          c.club +
+          "</p>" +
+          '<a href="#/collections/' +
+          c.slug +
+          '" class="mt-6 inline-flex rounded-xl border border-white/10 bg-black/30 px-4 py-2 text-sm font-semibold backdrop-blur-xl transition-all duration-300 hover:scale-105 hover:bg-white/10">View Collection</a>' +
+          "</div>"
+        );
+      }
+
+      function featuredCard(c) {
+        const r = getRarityStyles(c.tier, c.obtainable);
+        return (
+          '<div class="group relative overflow-hidden rounded-3xl border bg-gradient-to-br p-8 backdrop-blur-xl transition-all duration-500 hover:-translate-y-3 hover:scale-[1.02] ' +
+          r.border +
+          " " +
+          r.glow +
+          " " +
+          r.gradient +
+          '">' +
+          '<div class="absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100"><div class="absolute inset-0 bg-white/5 blur-3xl"></div></div>' +
+          (c.obtainable ? "" : shineOverlay()) +
+          '<div class="relative mb-10 flex h-72 items-center justify-center overflow-hidden rounded-2xl">' +
+          '<img src="' +
+          c.image +
+          '" alt="' +
+          c.title +
+          '" width="260" height="260" class="object-contain drop-shadow-[0_0_30px_rgba(255,255,255,0.15)] transition-all duration-500 group-hover:-translate-y-2 group-hover:scale-110" />' +
+          "</div>" +
+          '<div class="relative z-10">' +
+          '<div class="mb-6 flex flex-wrap gap-3">' +
+          '<div class="rounded-full px-4 py-1 text-xs font-bold uppercase tracking-widest ' +
+          r.badge +
+          '">T' +
+          c.tier +
+          "</div>" +
+          '<div class="rounded-full border px-4 py-1 text-xs font-bold uppercase tracking-widest ' +
+          statusClasses(c.obtainable) +
+          '">' +
+          (c.obtainable ? "Obtainable" : "Exclusive") +
+          "</div>" +
+          "</div>" +
+          '<h3 class="font-bebas text-5xl uppercase leading-none tracking-wide">' +
+          c.title +
+          "</h3>" +
+          '<p class="mt-3 text-zinc-300">' +
+          c.club +
+          "</p>" +
+          '<div class="mt-8 flex items-center gap-10">' +
+          '<div><p class="text-xs uppercase tracking-widest text-zinc-400">Founded</p><p class="mt-1 text-2xl font-bold text-white">' +
+          c.founded +
+          "</p></div>" +
+          '<div><p class="text-xs uppercase tracking-widest text-zinc-400">Trophies</p><p class="mt-1 text-2xl font-bold text-white">' +
+          c.trophies +
+          "</p></div>" +
+          "</div>" +
+          '<a href="#/collections/' +
+          c.slug +
+          '" class="mt-8 inline-flex rounded-xl border border-white/10 bg-black/30 px-5 py-3 text-sm font-semibold backdrop-blur-xl transition-all duration-300 hover:scale-105 hover:bg-white/10">View Collection</a>' +
+          "</div>" +
+          "</div>"
+        );
+      }
+
+      function featuredCollectionsSection() {
+        return (
+          '<section class="relative border-t border-white/5 px-6 py-32">' +
+          '<div class="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(249,115,22,0.08),transparent_60%)]"></div>' +
+          '<div class="relative z-10 mx-auto max-w-7xl">' +
+          '<div class="mb-16 text-center">' +
+          '<p class="mb-4 text-sm uppercase tracking-[0.3em] text-orange-400">Featured Collections</p>' +
+          '<h2 class="font-bebas text-6xl uppercase tracking-wide md:text-7xl">Legendary Football Eras</h2>' +
+          "</div>" +
+          '<div class="grid gap-8 md:grid-cols-2 xl:grid-cols-4">' +
+          collections.map(featuredCard).join("") +
+          "</div>" +
+          "</div>" +
+          "</section>"
+        );
+      }
+
+      function filterSelectHTML(rootId, label, value, options, className) {
+        const selected = options.find((o) => o.value === value);
+        return (
+          '<div id="' +
+          rootId +
+          '" class="relative ' +
+          className +
+          '" data-value="' +
+          value +
+          '">' +
+          '<span class="mb-2 block text-xs font-semibold uppercase tracking-[0.25em] text-zinc-500">' +
+          label +
+          "</span>" +
+          '<button type="button" class="fs-trigger flex min-h-[4.5rem] w-full items-center justify-between gap-4 rounded-2xl border px-6 py-4 text-left text-base font-medium transition-all duration-300 outline-none border-white/10 bg-white/5 text-white hover:border-white/20 hover:bg-white/[0.07]" aria-expanded="false" aria-haspopup="listbox">' +
+          '<span class="fs-label">' +
+          (selected ? selected.label : "Select") +
+          "</span>" +
+          '<span class="fs-chevron flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border text-lg leading-none transition-all duration-300 border-white/10 bg-black/40 text-zinc-400" aria-hidden>▾</span>' +
+          "</button>" +
+          "</div>"
+        );
+      }
+
+      function collectionDatabaseSection() {
+        return (
+          '<section class="relative px-6 py-32">' +
+          '<div class="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(249,115,22,0.05),transparent_65%)]"></div>' +
+          '<div class="relative z-10 mx-auto max-w-7xl">' +
+          '<div class="mb-14 text-center">' +
+          '<p class="mb-4 text-sm uppercase tracking-[0.35em] text-orange-400">Database</p>' +
+          '<h2 class="font-bebas text-6xl uppercase tracking-wide md:text-7xl">Browse Collections</h2>' +
+          "</div>" +
+          '<div class="mb-12 flex flex-col gap-5 lg:flex-row lg:items-stretch">' +
+          '<div class="w-full lg:flex-[2]">' +
+          '<span class="mb-2 block text-xs font-semibold uppercase tracking-[0.25em] text-zinc-500">Search</span>' +
+          '<input id="db-search" type="text" placeholder="Search collections..." class="min-h-[4.5rem] w-full rounded-2xl border border-white/10 bg-white/5 px-6 py-4 text-lg text-white placeholder:text-zinc-500 outline-none backdrop-blur-xl transition focus:border-orange-500/40 focus:ring-2 focus:ring-orange-500/20" />' +
+          "</div>" +
+          filterSelectHTML(
+            "db-filter",
+            "Filter",
+            "all",
+            filterOptions,
+            "w-full lg:min-w-[13rem] lg:flex-1",
+          ) +
+          filterSelectHTML(
+            "db-sort",
+            "Sort by",
+            "rarity",
+            sortOptions,
+            "w-full lg:min-w-[13rem] lg:flex-1",
+          ) +
+          "</div>" +
+          '<div id="db-grid" class="grid gap-8 md:grid-cols-2 xl:grid-cols-4"></div>' +
+          "</div>" +
+          "</section>"
+        );
+      }
+
+      function homePage() {
+        return (
+          '<main class="min-h-screen overflow-hidden bg-black text-white">' +
+          navbar() +
+          '<section class="relative flex min-h-screen items-center justify-center overflow-hidden px-6 pt-24">' +
+          '<div id="tsparticles-bg" class="pointer-events-none absolute inset-0 z-0" aria-hidden></div>' +
+          '<div class="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(249,115,22,0.15),transparent_40%)]"></div>' +
+          '<div class="absolute left-1/2 top-1/2 h-[500px] w-[500px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-orange-500/10 blur-3xl"></div>' +
+          '<div class="absolute inset-0 opacity-20"><div class="h-full w-full" style="background-image:linear-gradient(rgba(255,255,255,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.03) 1px,transparent 1px);background-size:80px 80px"></div></div>' +
+          '<div class="relative z-10 mx-auto flex max-w-6xl flex-col items-center text-center">' +
+          '<div class="mb-8 rounded-full border border-orange-500/20 bg-orange-500/10 px-5 py-2 text-xs uppercase tracking-[0.35em] text-orange-300 backdrop-blur-xl">The Ultimate Football Collection Platform</div>' +
+          '<h1 class="font-bebas text-7xl uppercase leading-none tracking-wide md:text-9xl">' +
+          '<span class="text-white">Build Your</span>' +
+          '<span class="mt-2 block bg-gradient-to-b from-orange-400 via-orange-500 to-orange-700 bg-clip-text text-transparent">Ultimate Football</span>' +
+          '<span class="mt-2 block text-white">Collection</span>' +
+          "</h1>" +
+          '<p class="mx-auto mt-8 max-w-2xl text-lg leading-relaxed text-zinc-400 md:text-xl">Discover legendary clubs, iconic football eras, exclusive collectibles, and football history inside FCDex.</p>' +
+          '<div class="mt-12 flex flex-col items-center gap-4 sm:flex-row">' +
+          '<button type="button" onclick="document.getElementById(\'collections\').scrollIntoView({behavior:\'smooth\'})" class="group relative overflow-hidden rounded-2xl bg-orange-500 px-8 py-4 text-lg font-semibold text-black shadow-[0_0_50px_rgba(249,115,22,0.35)] transition-all duration-300 hover:scale-105 hover:bg-orange-400">' +
+          '<span class="relative z-10">Explore Collections</span>' +
+          '<div class="absolute inset-0 translate-y-full bg-white/20 transition-transform duration-300 group-hover:translate-y-0"></div>' +
+          "</button>" +
+          '<a href="' +
+          DISCORD_URL +
+          '" target="_blank" rel="noopener noreferrer" class="rounded-2xl border border-white/10 bg-white/5 px-8 py-4 text-lg font-semibold backdrop-blur-xl transition-all duration-300 hover:scale-105 hover:border-orange-500/20 hover:bg-white/10">Join Discord</a>' +
+          "</div>" +
+          '<div class="mt-20 grid grid-cols-3 gap-10 border-t border-white/10 pt-10 text-center">' +
+          '<div><h3 class="font-bebas text-5xl text-orange-400">100+</h3><p class="mt-2 text-sm uppercase tracking-widest text-zinc-500">Clubs</p></div>' +
+          '<div><h3 class="font-bebas text-5xl text-orange-400">2000+</h3><p class="mt-2 text-sm uppercase tracking-widest text-zinc-500">Collections</p></div>' +
+          '<div><h3 class="font-bebas text-5xl text-orange-400">20+</h3><p class="mt-2 text-sm uppercase tracking-widest text-zinc-500">Legendary Eras</p></div>' +
+          "</div>" +
+          "</div>" +
+          "</section>" +
+          '<div id="collections">' +
+          featuredCollectionsSection() +
+          "</div>" +
+          collectionDatabaseSection() +
+          footer() +
+          "</main>"
+        );
+      }
+
+      function collectionPage(c) {
+        const r = getRarityStyles(c.tier, c.obtainable);
+        const statCard =
+          "min-w-0 rounded-2xl border bg-white/5 p-4 backdrop-blur-xl sm:rounded-3xl sm:p-6 " +
+          r.border;
+        const statLabel =
+          "text-xs font-medium uppercase tracking-widest text-zinc-500";
+        const statValue =
+          "mt-2 min-w-0 text-pretty text-xl font-bold leading-snug break-words sm:mt-3 sm:text-2xl lg:text-3xl";
+        const players = c.players
+          .map(
+            (p) =>
+              '<div class="group rounded-3xl border bg-white/5 p-8 text-center backdrop-blur-xl transition-all duration-300 hover:-translate-y-2 hover:bg-white/[0.07] ' +
+              r.border +
+              '"><div class="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-orange-500/10 text-3xl">⚽</div><h3 class="text-xl font-semibold text-white">' +
+              p +
+              "</h3></div>",
+          )
+          .join("");
+        return (
+          '<main class="min-h-screen overflow-hidden bg-black text-white">' +
+          navbar() +
+          '<section class="relative overflow-hidden border-b border-white/5 px-6 pb-24 pt-40">' +
+          '<div id="tsparticles-bg" class="pointer-events-none absolute inset-0 z-0" aria-hidden></div>' +
+          '<div class="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(249,115,22,0.14),transparent_45%)]"></div>' +
+          '<div class="absolute inset-0 opacity-20"><div class="h-full w-full" style="background-image:linear-gradient(rgba(255,255,255,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.03) 1px,transparent 1px);background-size:80px 80px"></div></div>' +
+          '<div class="relative z-10 mx-auto grid min-w-0 max-w-7xl items-center gap-20 md:grid-cols-2">' +
+          '<div class="min-w-0">' +
+          '<div class="mb-8 flex flex-wrap gap-3">' +
+          '<div class="rounded-full px-5 py-2 text-xs font-bold uppercase tracking-[0.35em] ' +
+          r.badge +
+          '">T' +
+          c.tier +
+          "</div>" +
+          '<div class="rounded-full border px-5 py-2 text-xs font-bold uppercase tracking-[0.35em] ' +
+          statusClasses(c.obtainable) +
+          '">' +
+          (c.obtainable ? "Obtainable" : "Exclusive") +
+          "</div>" +
+          "</div>" +
+          '<h1 class="font-bebas text-5xl uppercase leading-none tracking-wide sm:text-7xl md:text-9xl">' +
+          c.title +
+          "</h1>" +
+          '<p class="mt-6 max-w-2xl text-base leading-relaxed text-zinc-400 sm:mt-8 sm:text-lg">' +
+          c.description +
+          "</p>" +
+          '<div class="mt-8 grid min-w-0 grid-cols-2 gap-3 sm:mt-12 sm:gap-5">' +
+          '<div class="' +
+          statCard +
+          '"><p class="' +
+          statLabel +
+          '">Club</p><h3 class="' +
+          statValue +
+          '">' +
+          c.club +
+          "</h3></div>" +
+          '<div class="' +
+          statCard +
+          '"><p class="' +
+          statLabel +
+          '">League</p><h3 class="' +
+          statValue +
+          '">' +
+          c.league +
+          "</h3></div>" +
+          '<div class="' +
+          statCard +
+          '"><p class="' +
+          statLabel +
+          '">Founded</p><h3 class="' +
+          statValue +
+          '">' +
+          c.founded +
+          "</h3></div>" +
+          '<div class="' +
+          statCard +
+          " " +
+          r.glow +
+          '"><p class="' +
+          statLabel +
+          '">Trophies</p><h3 class="' +
+          statValue +
+          ' text-orange-400">' +
+          c.trophies +
+          "</h3></div>" +
+          "</div>" +
+          '<div class="mt-10 flex flex-col gap-4 sm:flex-row">' +
+          '<a href="#/" class="rounded-2xl bg-orange-500 px-8 py-4 text-center text-lg font-semibold text-black shadow-[0_0_40px_rgba(249,115,22,0.35)] transition-all duration-300 hover:scale-105 hover:bg-orange-400">Back Home</a>' +
+          '<a href="' +
+          DISCORD_URL +
+          '" target="_blank" rel="noopener noreferrer" class="rounded-2xl border border-white/10 bg-white/5 px-8 py-4 text-center text-lg font-semibold backdrop-blur-xl transition-all duration-300 hover:bg-white/10">Join Discord</a>' +
+          "</div>" +
+          "</div>" +
+          '<div class="relative flex items-center justify-center">' +
+          '<div class="absolute h-[450px] w-[450px] rounded-full blur-3xl ' +
+          r.glow +
+          '"></div>' +
+          (c.obtainable
+            ? ""
+            : '<div class="absolute inset-0 rounded-full bg-[linear-gradient(120deg,transparent_20%,rgba(255,255,255,0.12)_50%,transparent_80%)] bg-[length:250%_250%] animate-shine"></div>') +
+          '<img src="' +
+          c.image +
+          '" alt="' +
+          c.title +
+          '" width="550" height="550" class="relative z-10 object-contain drop-shadow-[0_0_40px_rgba(255,255,255,0.15)] transition-transform duration-500 hover:scale-105" />' +
+          "</div>" +
+          "</div>" +
+          "</section>" +
+          '<section class="relative px-6 py-24">' +
+          '<div class="mx-auto max-w-7xl">' +
+          '<div class="mb-14">' +
+          '<p class="mb-4 text-sm uppercase tracking-[0.35em] text-orange-400">Squad</p>' +
+          '<h2 class="font-bebas text-6xl uppercase tracking-wide">Legendary Players</h2>' +
+          "</div>" +
+          '<div class="grid gap-6 md:grid-cols-2 xl:grid-cols-5">' +
+          players +
+          "</div>" +
+          "</div>" +
+          "</section>" +
+          '<section class="border-t border-white/5 px-6 py-24">' +
+          '<div class="mx-auto max-w-5xl text-center">' +
+          '<p class="mb-4 text-sm uppercase tracking-[0.35em] text-orange-400">Era</p>' +
+          '<h2 class="font-bebas text-7xl uppercase tracking-wide">' +
+          c.era +
+          "</h2>" +
+          '<p class="mx-auto mt-8 max-w-3xl text-lg leading-relaxed text-zinc-400">This era defined football history and created one of the most iconic squads ever assembled in the modern game.</p>' +
+          "</div>" +
+          "</section>" +
+          footer() +
+          "</main>"
+        );
+      }
+
+      function tosPage() {
+        const h2 =
+          'h2 class="font-bebas text-5xl uppercase tracking-wide text-orange-400"';
+        const card =
+          'rounded-3xl border border-white/10 bg-white/5 p-6';
+        return (
+          '<main class="min-h-screen bg-black text-white">' +
+          navbar() +
+          '<section class="relative overflow-hidden border-b border-white/5 px-6 pb-20 pt-40">' +
+          '<div class="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(249,115,22,0.12),transparent_45%)]"></div>' +
+          '<div class="relative z-10 mx-auto max-w-5xl">' +
+          '<div class="mb-6 inline-flex rounded-full border border-orange-500/20 bg-orange-500/10 px-5 py-2 text-xs uppercase tracking-[0.35em] text-orange-300 backdrop-blur-xl">Legal</div>' +
+          '<h1 class="font-bebas text-7xl uppercase tracking-wide md:text-8xl">Terms of Service</h1>' +
+          '<p class="mt-6 max-w-3xl text-lg leading-relaxed text-zinc-400">Please read these terms carefully before using FCDex. By using the platform, you agree to follow all rules, guidelines, and policies listed below.</p>' +
+          "</div>" +
+          "</section>" +
+          '<section class="px-6 py-20">' +
+          '<div class="mx-auto max-w-5xl space-y-16">' +
+          "<div><" +
+          h2 +
+          ">Usage Agreement</" +
+          "h2><p class=\"mt-6 text-lg leading-relaxed text-zinc-400\">By using FCDex, you agree to follow all platform rules, community standards, and moderation decisions. Access may be revoked at any time if violations occur.</p></div>" +
+          "<div><" +
+          h2 +
+          ">User Conduct</" +
+          'h2><div class="mt-8 grid gap-6">' +
+          '<div class="' +
+          card +
+          '"><h3 class="text-2xl font-semibold text-white">Cheating & Exploits</h3><p class="mt-3 leading-relaxed text-zinc-400">Using macros, automation, exploits, third-party tools, or manipulating game mechanics for unfair advantage is strictly prohibited.</p></div>' +
+          '<div class="' +
+          card +
+          '"><h3 class="text-2xl font-semibold text-white">Account Sharing</h3><p class="mt-3 leading-relaxed text-zinc-400">Sharing accounts or using alternate accounts to gain advantages, farm collectibles, or bypass moderation is not allowed.</p></div>' +
+          '<div class="' +
+          card +
+          '"><h3 class="text-2xl font-semibold text-white">Community Behaviour</h3><p class="mt-3 leading-relaxed text-zinc-400">Harassment, bullying, impersonation of staff, discrimination, or abusive behavior toward users is prohibited.</p></div>' +
+          "</div></div>" +
+          "<div><" +
+          h2 +
+          ">Trading Rules</" +
+          "h2><p class=\"mt-6 text-lg leading-relaxed text-zinc-400\">All trades and donations are final once confirmed. Cross-trading for real money, external items, or services outside the FCDex ecosystem is forbidden.</p></div>" +
+          "<div><" +
+          h2 +
+          ">Privacy & Data</" +
+          "h2><p class=\"mt-6 text-lg leading-relaxed text-zinc-400\">FCDex only collects minimal data necessary for platform functionality. Personal information should never be shared through the bot or community systems.</p></div>" +
+          "<div><" +
+          h2 +
+          ">Moderation</" +
+          "h2><p class=\"mt-6 text-lg leading-relaxed text-zinc-400\">The FCDex Team reserves the right to issue warnings, restrictions, temporary bans, or permanent bans depending on the severity of rule violations.</p></div>" +
+          "<div><" +
+          h2 +
+          ">Contact</" +
+          'h2><p class="mt-6 text-lg leading-relaxed text-zinc-400">Need help or want to appeal a moderation action? Contact the FCDex Team through the Discord server or official support channels.</p>' +
+          '<a href="' +
+          DISCORD_URL +
+          '" target="_blank" rel="noopener noreferrer" class="mt-8 inline-flex rounded-2xl bg-orange-500 px-8 py-4 text-lg font-semibold text-black transition hover:scale-105 hover:bg-orange-400">Join Discord</a>' +
+          "</div>" +
+          "</div>" +
+          "</section>" +
+          "</main>"
+        );
+      }
+
+      function privacyPage() {
+        const h2 =
+          'h2 class="font-bebas text-5xl uppercase tracking-wide text-orange-400"';
+        const card =
+          'rounded-3xl border border-white/10 bg-white/5 p-6';
+        return (
+          '<main class="min-h-screen bg-black text-white">' +
+          navbar() +
+          '<section class="relative overflow-hidden border-b border-white/5 px-6 pb-20 pt-40">' +
+          '<div class="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(249,115,22,0.12),transparent_45%)]"></div>' +
+          '<div class="relative z-10 mx-auto max-w-5xl">' +
+          '<div class="mb-6 inline-flex rounded-full border border-orange-500/20 bg-orange-500/10 px-5 py-2 text-xs uppercase tracking-[0.35em] text-orange-300 backdrop-blur-xl">Legal</div>' +
+          '<h1 class="font-bebas text-7xl uppercase tracking-wide md:text-8xl">Privacy Policy</h1>' +
+          '<p class="mt-6 max-w-3xl text-lg leading-relaxed text-zinc-400">This page explains what data FCDex collects, how it is used, and how your information is protected.</p>' +
+          "</div>" +
+          "</section>" +
+          '<section class="px-6 py-20">' +
+          '<div class="mx-auto max-w-5xl space-y-16">' +
+          "<div><" +
+          h2 +
+          ">Data Collection</" +
+          "h2><p class=\"mt-6 text-lg leading-relaxed text-zinc-400\">FCDex collects limited data required for the platform to function properly. This includes Discord user IDs, server IDs, channel IDs, collectibles, trade history, and user-specific gameplay settings.</p></div>" +
+          '<div class="grid gap-6 md:grid-cols-2">' +
+          '<div class="' +
+          card +
+          '"><h3 class="text-2xl font-semibold text-white">User IDs</h3><p class="mt-3 leading-relaxed text-zinc-400">Used to identify players and store gameplay progress.</p></div>' +
+          '<div class="' +
+          card +
+          '"><h3 class="text-2xl font-semibold text-white">Server Settings</h3><p class="mt-3 leading-relaxed text-zinc-400">Used to manage collectible spawns and server preferences.</p></div>' +
+          '<div class="' +
+          card +
+          '"><h3 class="text-2xl font-semibold text-white">Trade History</h3><p class="mt-3 leading-relaxed text-zinc-400">Used to maintain collectible ownership and prevent abuse.</p></div>' +
+          '<div class="' +
+          card +
+          '"><h3 class="text-2xl font-semibold text-white">Message Analysis</h3><p class="mt-3 leading-relaxed text-zinc-400">Message content may be temporarily analyzed for anti-cheat purposes, but is never permanently stored.</p></div>' +
+          "</div>" +
+          "<div><" +
+          h2 +
+          ">Data Storage</" +
+          "h2><p class=\"mt-6 text-lg leading-relaxed text-zinc-400\">Persistent data is securely stored using PostgreSQL databases. Access is restricted exclusively to authorized FCDex application owners.</p></div>" +
+          "<div><" +
+          h2 +
+          ">Access To Data</" +
+          "h2><p class=\"mt-6 text-lg leading-relaxed text-zinc-400\">Only official FCDex application owners may access platform data. Moderators and public users do not have direct access to stored data.</p></div>" +
+          "<div><" +
+          h2 +
+          ">Your Rights</" +
+          "h2><p class=\"mt-6 text-lg leading-relaxed text-zinc-400\">You may request access to or deletion of your stored data by contacting the FCDex Team through official support channels.</p></div>" +
+          "<div><" +
+          h2 +
+          ">Contact</" +
+          'h2><p class="mt-6 text-lg leading-relaxed text-zinc-400">For privacy-related concerns or requests, please contact the FCDex Team through Discord.</p>' +
+          '<a href="' +
+          DISCORD_URL +
+          '" target="_blank" rel="noopener noreferrer" class="mt-8 inline-flex rounded-2xl bg-orange-500 px-8 py-4 text-lg font-semibold text-black transition hover:scale-105 hover:bg-orange-400">Join Discord</a>' +
+          "</div>" +
+          "</div>" +
+          "</section>" +
+          "</main>"
+        );
+      }
+
+      function notFoundPage() {
+        return (
+          '<main class="flex min-h-screen flex-col bg-black text-white">' +
+          navbar() +
+          '<section class="flex flex-1 flex-col items-center justify-center px-6 py-24 text-center">' +
+          '<p class="text-sm uppercase tracking-[0.35em] text-orange-400">404</p>' +
+          '<h1 class="mt-4 font-bebas text-7xl uppercase tracking-wide md:text-8xl">Page Not Found</h1>' +
+          '<p class="mt-6 max-w-md text-lg text-zinc-400">The collection or page you are looking for does not exist.</p>' +
+          '<a href="#/" class="mt-10 rounded-2xl bg-orange-500 px-8 py-4 text-lg font-semibold text-black transition hover:scale-105 hover:bg-orange-400">Back Home</a>' +
+          "</section>" +
+          "</main>"
+        );
+      }
+
+      function parseRoute(hash) {
+        const path = hash || "/";
+        if (path === "/") return { name: "home" };
+        if (path === "/tos") return { name: "tos" };
+        if (path === "/privacy") return { name: "privacy" };
+        if (path === "/404") return { name: "404" };
+        const m = path.match(/^\/collections\/(.+)$/);
+        if (m) return { name: "collection", slug: decodeURIComponent(m[1]) };
+        return { name: "404" };
+      }
+
+      let currentRoute = { name: "home" };
+      let particlesInstance = null;
+      let _scrollTarget = null;
+      let _selectsWired = false;
+      const dbState = { search: "", filter: "all", sort: "rarity" };
+
+      function destroyParticles() {
+        if (particlesInstance) {
+          try {
+            particlesInstance.destroy();
+          } catch (e) {}
+          particlesInstance = null;
+        }
+      }
+
+      function initParticles() {
+        if (!window.tsParticles) return;
+        const el = document.getElementById("tsparticles-bg");
+        if (!el) return;
+        tsParticles
+          .load({ id: "tsparticles-bg", options: particleOptions })
+          .then((c) => {
+            particlesInstance = c;
+          })
+          .catch(() => {});
+      }
+
+      function renderGrid() {
+        const grid = document.getElementById("db-grid");
+        if (!grid) return;
+        let data = collections.slice();
+        if (dbState.search) {
+          const s = dbState.search.toLowerCase();
+          data = data.filter(
+            (c) =>
+              c.title.toLowerCase().includes(s) ||
+              c.club.toLowerCase().includes(s),
+          );
+        }
+        if (dbState.filter === "obtainable")
+          data = data.filter((c) => c.obtainable);
+        if (dbState.filter === "exclusive")
+          data = data.filter((c) => !c.obtainable);
+        if (dbState.sort === "rarity") data.sort((a, b) => a.tier - b.tier);
+        if (dbState.sort === "alphabetical")
+          data.sort((a, b) => a.title.localeCompare(b.title));
+        grid.innerHTML = data.map(dbCard).join("");
+      }
+
+      function closeAllOtherSelects(except) {
+        document.querySelectorAll("[data-value]").forEach((r) => {
+          if (r !== except && r._close) r._close();
+        });
+      }
+
+      function wireSelect(root, options, onChange) {
+        const trigger = root.querySelector(".fs-trigger");
+        let open = false;
+
+        const close = () => {
+          open = false;
+          trigger.classList.remove(
+            "border-orange-500/50",
+            "bg-orange-500/10",
+            "text-white",
+            "shadow-[0_0_40px_rgba(249,115,22,0.2)]",
+          );
+          trigger.classList.add(
+            "border-white/10",
+            "bg-white/5",
+            "text-white",
+            "hover:border-white/20",
+            "hover:bg-white/[0.07]",
+          );
+          const chevron = root.querySelector(".fs-chevron");
+          chevron.classList.remove(
+            "rotate-180",
+            "border-orange-500/40",
+            "bg-orange-500/20",
+            "text-orange-300",
+          );
+          chevron.classList.add(
+            "border-white/10",
+            "bg-black/40",
+            "text-zinc-400",
+          );
+          trigger.setAttribute("aria-expanded", "false");
+          const list = root.querySelector(".fs-list");
+          if (list) list.remove();
+        };
+
+        const openList = () => {
+          open = true;
+          trigger.classList.add(
+            "border-orange-500/50",
+            "bg-orange-500/10",
+            "text-white",
+            "shadow-[0_0_40px_rgba(249,115,22,0.2)]",
+          );
+          trigger.classList.remove(
+            "border-white/10",
+            "bg-white/5",
+            "hover:border-white/20",
+            "hover:bg-white/[0.07]",
+          );
+          const chevron = root.querySelector(".fs-chevron");
+          chevron.classList.add(
+            "rotate-180",
+            "border-orange-500/40",
+            "bg-orange-500/20",
+            "text-orange-300",
+          );
+          chevron.classList.remove(
+            "border-white/10",
+            "bg-black/40",
+            "text-zinc-400",
+          );
+          trigger.setAttribute("aria-expanded", "true");
+          closeAllOtherSelects(root);
+          const value = root.getAttribute("data-value");
+          const label = root.querySelector("span").textContent;
+          const list = document.createElement("div");
+          list.className =
+            "fs-list absolute top-[calc(100%+0.5rem)] right-0 left-0 z-50 overflow-hidden rounded-2xl border border-orange-500/30 bg-zinc-950/95 p-2 shadow-[0_24px_80px_rgba(0,0,0,0.55),0_0_60px_rgba(249,115,22,0.15)] backdrop-blur-xl animate-dropdown-in";
+          list.setAttribute("role", "listbox");
+          list.setAttribute("aria-label", label);
+          list.innerHTML = options
+            .map((opt, i) => {
+              const sel = opt.value === value;
+              return (
+                "<div><button type=\"button\" role=\"option\" aria-selected=\"" +
+                sel +
+                '" style="animation-delay:' +
+                i * 40 +
+                'ms" class="fs-option flex w-full items-center justify-between rounded-xl px-4 py-3.5 text-left text-sm font-medium transition-all duration-200 animate-dropdown-item outline-none ' +
+                (sel
+                  ? "bg-orange-500/20 text-orange-200"
+                  : "text-zinc-300 hover:bg-white/10 hover:text-white") +
+                '"><span>' +
+                opt.label +
+                "</span>" +
+                (sel
+                  ? '<span class="text-orange-400" aria-hidden>✓</span>'
+                  : "") +
+                "</button></div>"
+              );
+            })
+            .join("");
+          root.appendChild(list);
+          list.querySelectorAll(".fs-option").forEach((btn, idx) => {
+            btn.addEventListener("click", () => {
+              root.setAttribute("data-value", options[idx].value);
+              root.querySelector(".fs-label").textContent = options[idx].label;
+              onChange(options[idx].value);
+              close();
+            });
+          });
+        };
+
+        trigger.addEventListener("click", () => (open ? close() : openList()));
+        root._close = close;
+      }
+
+      function wireDatabase() {
+        const search = document.getElementById("db-search");
+        if (search) {
+          search.addEventListener("input", () => {
+            dbState.search = search.value;
+            renderGrid();
+          });
+        }
+        const fr = document.getElementById("db-filter");
+        const sr = document.getElementById("db-sort");
+        if (fr)
+          wireSelect(fr, filterOptions, (v) => {
+            dbState.filter = v;
+            renderGrid();
+          });
+        if (sr)
+          wireSelect(sr, sortOptions, (v) => {
+            dbState.sort = v;
+            renderGrid();
+          });
+        if (!_selectsWired) {
+          document.addEventListener("mousedown", (e) => {
+            document.querySelectorAll("[data-value]").forEach((r) => {
+              if (!r.contains(e.target) && r._close) r._close();
+            });
+          });
+          document.addEventListener("keydown", (e) => {
+            if (e.key === "Escape") {
+              document
+                .querySelectorAll("[data-value]")
+                .forEach((r) => {
+                  if (r._close) r._close();
+                });
+            }
+          });
+          _selectsWired = true;
+        }
+      }
+
+      function scrollToCollections(e) {
+        e.preventDefault();
+        if (currentRoute.name === "home") {
+          const el = document.getElementById("collections");
+          if (el) el.scrollIntoView({ behavior: "smooth" });
+        } else {
+          _scrollTarget = "collections";
+          location.hash = "#/";
+        }
+      }
+
+      function render() {
+        destroyParticles();
+        const raw = location.hash.replace(/^#/, "");
+        const route = parseRoute(raw || "/");
+        currentRoute = route;
+        const app = document.getElementById("app");
+        let html = "";
+        let title = "FCDex";
+        if (route.name === "home") {
+          html = homePage();
+        } else if (route.name === "collection") {
+          const c = collections.find((x) => x.slug === route.slug);
+          if (!c) {
+            html = notFoundPage();
+          } else {
+            html = collectionPage(c);
+            title = c.title + " | FCDex";
+          }
+        } else if (route.name === "tos") {
+          html = tosPage();
+        } else if (route.name === "privacy") {
+          html = privacyPage();
+        } else {
+          html = notFoundPage();
+        }
+        document.title = title;
+        app.innerHTML = html;
+
+        if (route.name === "home") {
+          initParticles();
+          wireDatabase();
+          renderGrid();
+        } else if (route.name === "collection") {
+          initParticles();
+        }
+
+        window.scrollTo(0, 0);
+        if (_scrollTarget) {
+          const el = document.getElementById(_scrollTarget);
+          if (el) el.scrollIntoView({ behavior: "smooth" });
+          _scrollTarget = null;
+        }
+      }
+
+      window.addEventListener("hashchange", render);
+      if (document.readyState === "loading") {
+        window.addEventListener("DOMContentLoaded", render);
+      } else {
+        render();
+      }
+    </script>
   </body>
 </html>
